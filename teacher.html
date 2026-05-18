@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A-UOS | Faculty Evaluation Console</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Outfit', 'Inter', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            50: '#fef2f2', 100: '#fee2e2', 200: '#fecaca', 300: '#fca5a5',
+                            400: '#f87171', 500: '#ef4444', 600: '#dc2626', 700: '#b91c1c',
+                            800: '#991b1b', 900: '#7f1d1d', 950: '#450a0a',
+                        }
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-out forwards',
+                        'slide-up': 'slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'float': 'float 8s ease-in-out infinite',
+                        'float-delayed': 'float 8s ease-in-out 4s infinite',
+                        'float-fast': 'float 6s ease-in-out 2s infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+                        slideUp: { '0%': { opacity: '0', transform: 'translateY(20px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+                        float: { '0%, 100%': { transform: 'translateY(0) rotate(0deg)' }, '50%': { transform: 'translateY(-15px) rotate(3deg)' } }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #f8fafc; --bg-panel: rgba(255, 255, 255, 0.65); --bg-input: rgba(255, 255, 255, 0.85); --bg-hover: rgba(254, 242, 242, 0.7);
+            --text-main: #0f172a; --text-muted: #64748b; 
+            --accent-primary: #ff0000; 
+            --accent-secondary: #fdcf58;
+            --border-color: rgba(255, 0, 0, 0.1); --border-light: rgba(255, 255, 255, 0.8); 
+            --glass-shadow: 0 8px 32px 0 rgba(255, 0, 0, 0.05);
+        }
+        html.dark {
+            /* Changed dark mode background to fully black */
+            --bg-main: #000000; --bg-panel: rgba(10, 10, 10, 0.65); --bg-input: rgba(20, 20, 20, 0.85); --bg-hover: rgba(30, 30, 30, 0.7);
+            --text-main: #f8fafc; --text-muted: #94a3b8; 
+            --accent-primary: #ff4d4d; 
+            --accent-secondary: #fde047;
+            --border-color: rgba(255, 77, 77, 0.15); --border-light: rgba(255, 255, 255, 0.05); 
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+        }
+        body { 
+            font-family: 'Outfit', sans-serif; 
+            background-color: var(--bg-main); 
+            color: var(--text-main); 
+        }
+        
+        /* Premium True Glassmorphism */
+        .glass-card { 
+            background: var(--bg-panel); 
+            backdrop-filter: blur(24px); 
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--border-color); 
+            border-top: 1px solid var(--border-light);
+            border-left: 1px solid var(--border-light);
+            box-shadow: var(--glass-shadow); 
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .nav-active { 
+            background: linear-gradient(90deg, rgba(255, 0, 0, 0.08) 0%, transparent 100%); 
+            border-left: 4px solid var(--accent-primary); 
+            color: var(--accent-primary); 
+            font-weight: 800; 
+        }
+        
+        /* Continuous Flowing Text Gradient Animation */
+        @keyframes gradientFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .action-button { 
+            background: linear-gradient(270deg, var(--accent-primary), var(--accent-secondary), var(--accent-primary)); 
+            background-size: 200% 200%;
+            color: white; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            border: none; 
+            animation: gradientFlow 6s ease infinite;
+        }
+        .action-button:hover { 
+            filter: brightness(1.1); 
+            transform: translateY(-3px); 
+            box-shadow: 0 12px 25px -8px rgba(255, 0, 0, 0.5); 
+        }
+        
+        .glowing-text { 
+            background: linear-gradient(270deg, var(--accent-primary), var(--accent-secondary), var(--accent-primary)); 
+            background-size: 200% 200%;
+            -webkit-background-clip: text; 
+            color: transparent; 
+            animation: gradientFlow 6s ease infinite;
+        }
+
+        .input-field { 
+            background-color: var(--bg-input); 
+            border: 1px solid var(--border-color); 
+            color: var(--text-main); 
+            transition: all 0.3s ease; 
+        }
+        .input-field:focus { 
+            border-color: var(--accent-primary); 
+            box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.02), 0 0 0 4px rgba(255, 0, 0, 0.15); 
+            outline: none; 
+            transform: translateY(-2px);
+        }
+
+        /* Colorful Glass Icon Wrappers */
+        .glass-icon-blue { background: rgba(59, 130, 246, 0.15); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3); box-shadow: inset 0 0 15px rgba(59, 130, 246, 0.1); }
+        .glass-icon-amber { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); box-shadow: inset 0 0 15px rgba(245, 158, 11, 0.1); }
+        .glass-icon-emerald { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); box-shadow: inset 0 0 15px rgba(16, 185, 129, 0.1); }
+        .glass-icon-purple { background: rgba(168, 85, 247, 0.15); color: #a855f7; border: 1px solid rgba(168, 85, 247, 0.3); box-shadow: inset 0 0 15px rgba(168, 85, 247, 0.1); }
+        .glass-icon-rose { background: rgba(244, 63, 94, 0.15); color: #f43f5e; border: 1px solid rgba(244, 63, 94, 0.3); box-shadow: inset 0 0 15px rgba(244, 63, 94, 0.1); }
+
+        /* Mobile Sidebar Overlay */
+        .mobile-overlay { display: none; }
+        @media (max-width: 768px) {
+            .mobile-overlay.active { display: block; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8); z-index: 45; backdrop-filter: blur(8px); }
+            aside { transform: translateX(-100%); position: fixed; height: 100%; top: 0; left: 0; z-index: 50; }
+            aside.mobile-open { transform: translateX(0); }
+        }
+        
+        ::-webkit-scrollbar { width: 6px; height: 6px; } 
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,0,0,0.2); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,0,0,0.5); }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden relative">
+
+    <!-- COLORFUL FLOATING BACKGROUND ANIMATIONS -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none z-[-1]">
+        <!-- Large Icons -->
+        <i class="fa-solid fa-graduation-cap text-red-500/10 dark:text-red-500/5 text-[15rem] absolute -top-10 -left-10 animate-float"></i>
+        <i class="fa-solid fa-book-open text-orange-500/10 dark:text-orange-500/5 text-[12rem] absolute top-1/4 right-10 animate-float-delayed"></i>
+        <i class="fa-solid fa-pencil text-yellow-500/10 dark:text-yellow-500/5 text-[10rem] absolute bottom-20 left-1/4 animate-float-fast"></i>
+        <i class="fa-solid fa-microscope text-amber-500/10 dark:text-amber-500/5 text-[14rem] absolute -bottom-10 -right-10 animate-float"></i>
+        
+        <!-- Small Scattered Colorful Icons -->
+        <i class="fa-solid fa-atom text-blue-500/20 dark:text-blue-500/10 text-4xl absolute top-[20%] left-[25%] animate-float-delayed"></i>
+        <i class="fa-solid fa-calculator text-emerald-500/20 dark:text-emerald-500/10 text-3xl absolute top-[30%] right-[25%] animate-float-fast"></i>
+        <i class="fa-solid fa-flask text-purple-500/20 dark:text-purple-500/10 text-5xl absolute bottom-[35%] left-[8%] animate-float"></i>
+        <i class="fa-solid fa-globe text-orange-500/20 dark:text-orange-500/10 text-3xl absolute bottom-[25%] right-[30%] animate-float-delayed"></i>
+        <i class="fa-regular fa-lightbulb text-yellow-500/20 dark:text-yellow-500/10 text-4xl absolute top-[10%] right-[35%] animate-float-fast"></i>
+        <i class="fa-solid fa-star text-pink-500/20 dark:text-pink-500/10 text-2xl absolute bottom-[10%] right-[20%] animate-float"></i>
+    </div>
+
+    <!-- Mobile Overlay -->
+    <div id="mobile-sidebar-overlay" class="mobile-overlay" onclick="toggleMobileSidebar()"></div>
+
+    <!-- Secure Login View -->
+    <div id="view-login" class="fixed inset-0 z-[200] flex items-center justify-center bg-[var(--bg-main)] p-4 backdrop-blur-md">
+        <div class="glass-card p-8 md:p-12 rounded-[2.5rem] w-full max-w-md animate-slide-up border-t-8 border-t-[var(--accent-primary)] shadow-2xl">
+            <div class="flex justify-center mb-6 relative">
+                <div class="absolute inset-0 bg-red-500/20 blur-xl rounded-full animate-pulse-slow"></div>
+                <div class="w-24 h-24 rounded-[2rem] glass-icon-rose flex items-center justify-center text-5xl relative z-10">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+            </div>
+            <h2 class="text-3xl font-black text-center tracking-tight mb-2 glowing-text drop-shadow-sm">Faculty Auth</h2>
+            <p class="text-[var(--text-muted)] text-xs font-bold text-center mb-8 uppercase tracking-widest">Sign in to access evaluation portal</p>
+            
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-[10px] font-black text-[var(--text-muted)] uppercase tracking-wider mb-2 pl-1">Institutional Email</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]"></i>
+                        <input type="email" id="login-email" placeholder="faculty@university.edu" class="input-field w-full pl-11 pr-4 py-4 rounded-2xl font-medium shadow-inner">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black text-[var(--text-muted)] uppercase tracking-wider mb-2 pl-1">Password</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]"></i>
+                        <input type="password" id="login-pass" placeholder="••••••••" class="input-field w-full pl-11 pr-4 py-4 rounded-2xl tracking-widest shadow-inner">
+                    </div>
+                </div>
+                <button onclick="handleLogin()" id="login-btn" class="w-full action-button py-4 rounded-2xl mt-4 font-black text-sm tracking-widest uppercase shadow-lg">Authenticate Access <i class="fa-solid fa-arrow-right ml-2"></i></button>
+                <div id="login-error" class="hidden text-rose-600 text-xs font-bold text-center mt-3 p-3 bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 rounded-xl"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Sidebar -->
+    <aside class="w-72 bg-[var(--bg-panel)] border-r border-[var(--border-color)] flex flex-col transition-transform duration-300 shadow-2xl md:shadow-none backdrop-blur-2xl">
+        <div class="p-6 flex items-center justify-between border-b border-[var(--border-color)]">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-[1rem] glass-icon-rose flex items-center justify-center font-black text-xl">
+                    <i class="fa-solid fa-building-columns"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-black tracking-tight glowing-text">A-UOS</h1>
+                    <p class="text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-black">Faculty Console</p>
+                </div>
+            </div>
+            <button class="md:hidden text-2xl text-[var(--text-muted)] hover:text-[var(--accent-primary)] transition-colors" onclick="toggleMobileSidebar()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        
+        <div class="p-4 flex-1 overflow-y-auto space-y-2 mt-2 custom-scrollbar">
+            <p class="px-4 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)] opacity-70 mb-3">Evaluation Hub</p>
+            <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-active w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl text-sm font-bold hover:bg-[var(--bg-hover)] transition-all text-[var(--text-main)] group"><i class="fa-solid fa-chart-pie w-5 text-center group-hover:scale-110 group-hover:text-[var(--accent-primary)] transition-all"></i> Overview</button>
+            <button onclick="switchTab('assignments')" id="nav-assignments" class="w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl text-sm font-bold hover:bg-[var(--bg-hover)] transition-all text-[var(--text-main)] group"><i class="fa-solid fa-inbox w-5 text-center group-hover:scale-110 group-hover:text-[var(--accent-primary)] transition-all"></i> Pending Sheets</button>
+            <button onclick="switchTab('checked')" id="nav-checked" class="w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl text-sm font-bold hover:bg-[var(--bg-hover)] transition-all text-[var(--text-main)] group"><i class="fa-solid fa-check-double w-5 text-center group-hover:scale-110 group-hover:text-[var(--accent-primary)] transition-all"></i> Grading History</button>
+            
+            <p class="px-4 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)] opacity-70 mt-8 mb-3">Account</p>
+            <button onclick="switchTab('profile')" id="nav-profile" class="w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl text-sm font-bold hover:bg-[var(--bg-hover)] transition-all text-[var(--text-main)] group"><i class="fa-regular fa-id-badge w-5 text-center group-hover:scale-110 group-hover:text-[var(--accent-primary)] transition-all"></i> My Profile</button>
+        </div>
+
+        <div class="p-6 border-t border-[var(--border-color)]">
+            <div class="glass-card flex items-center gap-3 mb-4 p-2 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+                <div class="w-10 h-10 rounded-xl action-button flex items-center justify-center text-white shrink-0 shadow-md"><i class="fa-solid fa-user-tie"></i></div>
+                <div class="overflow-hidden"><p class="text-sm font-black truncate text-[var(--text-main)]" id="auth-name">Loading...</p><p class="text-[10px] text-[var(--text-muted)] truncate font-bold" id="auth-email">...</p></div>
+            </div>
+            <button onclick="logout()" class="w-full bg-rose-50 dark:bg-rose-900/20 text-rose-600 py-3.5 rounded-xl text-xs font-black hover:bg-rose-500 hover:text-white transition-all border border-rose-200 dark:border-rose-900/50 shadow-sm flex items-center justify-center gap-2"><i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out</button>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden relative z-10">
+        <header class="glass-card rounded-none border-x-0 border-t-0 px-6 md:px-10 py-4 md:py-5 flex justify-between items-center z-20 shadow-sm">
+            <div class="flex items-center gap-4">
+                <button class="md:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-[var(--bg-hover)] text-[var(--text-muted)] hover:text-[var(--accent-primary)] transition-colors" onclick="toggleMobileSidebar()"><i class="fa-solid fa-bars-staggered"></i></button>
+                <h2 class="text-xl md:text-2xl font-black tracking-tight glowing-text sm:block" id="page-title">Overview</h2>
+            </div>
+            <div class="flex items-center gap-3 md:gap-4">
+                <div class="hidden md:flex items-center text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] bg-[var(--bg-input)] px-4 py-2.5 rounded-xl border border-[var(--border-color)] shadow-sm">
+                    <i class="fa-solid fa-signal mr-2 text-[var(--accent-primary)] animate-pulse"></i> Live Connection
+                </div>
+                <button onclick="toggleTheme()" class="w-11 h-11 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] flex items-center justify-center hover:scale-105 shadow-sm transition-all text-lg hover:text-[var(--accent-primary)]"><i class="fa-solid fa-moon dark:hidden"></i><i class="fa-solid fa-sun hidden dark:block"></i></button>
+            </div>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-4 md:p-6 lg:px-8 lg:py-8 space-y-8" id="main-scroll">
+            
+            <!-- Dashboard View -->
+            <div id="view-dashboard" class="space-y-8 animate-fade-in">
+                
+                <!-- Premium Flowing Gradient Welcome Banner -->
+                <div class="glass-card relative overflow-hidden rounded-[2rem] md:rounded-[2.5rem] bg-gradient-to-r from-red-600 via-orange-500 to-yellow-400 border-none shadow-[0_15px_40px_-10px_rgba(255,0,0,0.4)] p-6 md:p-10 text-white flex flex-col md:flex-row justify-between items-center gap-8 animate-slide-up" style="background-size: 200% 200%; animation: gradientFlow 8s ease infinite;">
+                    <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-30 mix-blend-overlay"></div>
+                    <div class="absolute top-0 right-0 -mt-10 -mr-10 w-48 h-48 bg-white/20 rounded-full blur-3xl animate-pulse"></div>
+                    <div class="absolute bottom-0 left-10 w-32 h-32 bg-red-900/40 rounded-full blur-2xl"></div>
+                    <i class="fa-solid fa-microscope absolute -right-6 -bottom-6 text-8xl text-white/10 transform -rotate-12 transition-transform duration-500 hover:scale-110"></i>
+                    
+                    <div class="relative z-10 text-center md:text-left flex-1">
+                        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/20 border border-white/30 backdrop-blur-md text-[10px] font-black uppercase tracking-widest text-red-50 mb-4 shadow-sm">
+                            <i class="fa-solid fa-bolt text-amber-300"></i> Faculty Dashboard
+                        </div>
+                        <h3 class="text-3xl md:text-4xl font-black mb-3 tracking-tight drop-shadow-md">Welcome back, <span id="dash-welcome-name">Professor</span>!</h3>
+                        <p class="text-red-50 text-sm md:text-base font-medium max-w-2xl leading-relaxed drop-shadow-sm">You have <strong id="banner-pending-count" class="text-white text-lg bg-red-800/50 px-2 py-0.5 rounded-md shadow-inner border border-red-400/30 mx-1">0</strong> papers awaiting your review. Maintaining a prompt grading schedule ensures timely student feedback.</p>
+                    </div>
+                    
+                    <button onclick="switchTab('assignments')" class="relative z-10 bg-white text-red-600 px-8 py-4.5 rounded-2xl font-black uppercase tracking-widest text-xs hover:scale-105 hover:bg-red-50 shadow-[0_10px_25px_rgba(0,0,0,0.25)] transition-all shrink-0 flex items-center gap-3 border border-red-100 group">
+                        <i class="fa-solid fa-pen-nib group-hover:rotate-12 transition-transform text-red-500"></i> Start Grading
+                    </button>
+                </div>
+
+                <!-- Stats Grid with Colorful Glass Icons -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="glass-card p-6 md:p-8 rounded-[2rem] hover:-translate-y-1 transition-all group animate-slide-up" style="animation-delay: 0.1s;">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="w-14 h-14 rounded-2xl glass-icon-blue flex items-center justify-center text-2xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+                                <i class="fa-solid fa-layer-group"></i>
+                            </div>
+                            <span class="bg-blue-50 dark:bg-blue-900/30 text-blue-500 px-2 py-1 rounded border border-blue-200 dark:border-blue-800 text-[10px] font-black"><i class="fa-solid fa-arrow-trend-up"></i></span>
+                        </div>
+                        <p class="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1">Total Assigned</p>
+                        <h3 class="text-4xl font-black text-[var(--text-main)]" id="stat-assigned">0</h3>
+                    </div>
+
+                    <div class="glass-card p-6 md:p-8 rounded-[2rem] hover:-translate-y-1 transition-all group animate-slide-up" style="animation-delay: 0.2s;">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="w-14 h-14 rounded-2xl glass-icon-amber flex items-center justify-center text-2xl group-hover:scale-110 group-hover:-rotate-6 transition-all duration-300">
+                                <i class="fa-solid fa-hourglass-half"></i>
+                            </div>
+                            <span class="bg-amber-50 dark:bg-amber-900/30 text-amber-500 px-2 py-1 rounded border border-amber-200 dark:border-amber-800 text-[10px] font-black animate-pulse"><i class="fa-solid fa-circle-exclamation"></i></span>
+                        </div>
+                        <p class="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1">Pending Review</p>
+                        <h3 class="text-4xl font-black text-[var(--text-main)]" id="stat-pending">0</h3>
+                    </div>
+
+                    <div class="glass-card p-6 md:p-8 rounded-[2rem] hover:-translate-y-1 transition-all group animate-slide-up" style="animation-delay: 0.3s;">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="w-14 h-14 rounded-2xl glass-icon-emerald flex items-center justify-center text-2xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+                                <i class="fa-solid fa-check-double"></i>
+                            </div>
+                            <span class="bg-emerald-50 dark:bg-emerald-900/30 text-emerald-500 px-2 py-1 rounded border border-emerald-200 dark:border-emerald-800 text-[10px] font-black"><i class="fa-solid fa-shield-check"></i></span>
+                        </div>
+                        <p class="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1">Evaluated</p>
+                        <h3 class="text-4xl font-black text-[var(--text-main)]" id="stat-checked">0</h3>
+                    </div>
+
+                    <div class="glass-card p-6 md:p-8 rounded-[2rem] hover:-translate-y-1 transition-all group animate-slide-up" style="animation-delay: 0.4s;">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="w-14 h-14 rounded-2xl glass-icon-purple flex items-center justify-center text-2xl group-hover:scale-110 group-hover:-rotate-6 transition-all duration-300">
+                                <i class="fa-solid fa-chart-pie"></i>
+                            </div>
+                        </div>
+                        <p class="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1">Completion Rate</p>
+                        <h3 class="text-4xl font-black text-[var(--text-main)]" id="stat-rate">0%</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pending Evaluations View -->
+            <div id="view-assignments" class="hidden space-y-6 animate-fade-in">
+                <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 glass-card p-4 rounded-[2rem] shadow-sm">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl glass-icon-amber flex items-center justify-center text-lg"><i class="fa-solid fa-inbox"></i></div>
+                        <h3 class="text-sm font-black uppercase tracking-widest text-[var(--text-main)]">Action Required</h3>
+                    </div>
+                    <div class="relative w-full sm:w-72">
+                        <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] text-xs"></i>
+                        <input type="text" id="search-pending" placeholder="Search roll number..." onkeyup="filterLists()" class="input-field w-full pl-10 pr-4 py-3.5 rounded-xl text-xs font-bold shadow-inner">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" id="list-pending"></div>
+            </div>
+
+            <!-- History & Revaluations View -->
+            <div id="view-checked" class="hidden space-y-6 animate-fade-in">
+                <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 glass-card p-4 rounded-[2rem] shadow-sm">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl glass-icon-emerald flex items-center justify-center text-lg"><i class="fa-solid fa-clipboard-check"></i></div>
+                        <h3 class="text-sm font-black uppercase tracking-widest text-[var(--text-main)]">Evaluation Archive</h3>
+                    </div>
+                    <div class="relative w-full sm:w-72">
+                        <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] text-xs"></i>
+                        <input type="text" id="search-checked" placeholder="Search student or exam..." onkeyup="filterLists()" class="input-field w-full pl-10 pr-4 py-3.5 rounded-xl text-xs font-bold shadow-inner">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" id="list-checked"></div>
+            </div>
+
+            <!-- Teacher Profile View -->
+            <div id="view-profile" class="hidden space-y-6 animate-fade-in">
+                <div class="glass-card rounded-[2.5rem] overflow-hidden border-t-4 border-t-[var(--accent-primary)]">
+                    <div class="h-40 md:h-48 bg-[var(--bg-input)] relative overflow-hidden">
+                        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-[var(--bg-panel)] to-transparent"></div>
+                    </div>
+                    
+                    <!-- Fixed Collapsing Icon & Name (Flex Layout) -->
+                    <div class="px-6 md:px-10 pb-10 relative -mt-16 md:-mt-24">
+                        <div class="flex flex-col md:flex-row items-center md:items-end gap-6 text-center md:text-left">
+                            <div class="w-32 h-40 rounded-[2rem] glass-icon-rose shadow-2xl flex flex-col items-center justify-center text-5xl backdrop-blur-xl border-[6px] border-[var(--bg-panel)] shrink-0">
+                                <i class="fa-solid fa-id-badge mb-1"></i>
+                                <div class="w-12 h-1.5 bg-red-500/50 rounded-full mt-2"></div>
+                            </div>
+                            <div class="flex-1 w-full overflow-hidden">
+                                <h2 class="text-3xl md:text-4xl font-black text-[var(--text-main)] tracking-tight truncate" id="prof-name">Loading...</h2>
+                                <p class="text-sm font-bold text-[var(--accent-primary)] mt-1 uppercase tracking-widest truncate" id="prof-email">Loading...</p>
+                            </div>
+                            <div class="shrink-0 md:mb-2">
+                                <span class="bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest border border-emerald-200 dark:border-emerald-800 w-fit shadow-sm whitespace-nowrap flex items-center"><i class="fa-solid fa-shield-check mr-2"></i> Official Faculty</span>
+                            </div>
+                        </div>
+
+                        <!-- Removed Contact Details Section completely -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8 pt-8 border-t border-[var(--border-color)]">
+                            <div class="input-field p-6 rounded-2xl shadow-sm hover:-translate-y-1 transition-transform">
+                                <p class="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-2 flex items-center gap-2"><div class="w-6 h-6 rounded bg-red-100 text-red-500 inline-flex items-center justify-center mr-1"><i class="fa-solid fa-building"></i></div> Department</p>
+                                <p class="text-xl font-black text-[var(--text-main)] truncate" id="prof-dept">---</p>
+                            </div>
+                            <div class="input-field p-6 rounded-2xl shadow-sm hover:-translate-y-1 transition-transform">
+                                <p class="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-2 flex items-center gap-2"><div class="w-6 h-6 rounded bg-orange-100 text-orange-500 inline-flex items-center justify-center mr-1"><i class="fa-solid fa-book-open"></i></div> Primary Subject</p>
+                                <p class="text-xl font-black text-[var(--text-main)] truncate" id="prof-subj">---</p>
+                            </div>
+                            <div class="input-field p-6 rounded-2xl shadow-sm hover:-translate-y-1 transition-transform">
+                                <p class="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-2 flex items-center gap-2"><div class="w-6 h-6 rounded bg-amber-100 text-amber-500 inline-flex items-center justify-center mr-1"><i class="fa-solid fa-user-gear"></i></div> Account Role</p>
+                                <p class="text-xl font-black text-[var(--text-main)]">Evaluator / Instructor</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Full Screen Evaluation Modal -->
+            <div id="view-evaluate" class="hidden fixed inset-0 bg-[var(--bg-main)] z-[150] flex flex-col lg:flex-row animate-slide-up backdrop-blur-lg">
+                <!-- PDF Viewer Area -->
+                <div class="w-full lg:w-3/5 h-[45vh] lg:h-full flex flex-col border-b lg:border-b-0 lg:border-r border-[var(--border-color)] bg-[#0f172a] shadow-2xl relative">
+                    <div class="p-3 md:p-4 bg-[#1e293b] flex flex-wrap justify-between items-center gap-3 border-b border-[#334155] z-10 shadow-lg">
+                        <h4 class="font-black text-xs md:text-sm text-white flex items-center gap-3 uppercase tracking-widest"><div class="w-8 h-8 rounded-lg bg-red-500/20 text-red-500 flex items-center justify-center"><i class="fa-solid fa-file-pdf"></i></div> <span class="hidden sm:inline">Manuscript Viewer</span></h4>
+                        <div class="flex flex-wrap items-center gap-2 md:gap-3">
+                            <button id="eval-qp-btn" class="hidden bg-red-500/20 text-red-400 px-3 py-2 md:px-4 md:py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-colors border border-red-500/30 flex items-center gap-2 shadow-sm"><i class="fa-solid fa-link"></i> <span class="hidden sm:inline">Q-Paper</span></button>
+                            <button onclick="window.open(document.getElementById('eval-iframe').src, '_blank')" class="bg-slate-800 text-slate-300 px-3 py-2 md:px-4 md:py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-700 transition-colors border border-slate-600 flex items-center gap-2 shadow-sm"><i class="fa-solid fa-arrow-up-right-from-square"></i> <span class="hidden sm:inline">Pop-out</span></button>
+                            <button onclick="closeEvaluation()" class="bg-rose-500/10 text-rose-500 px-3 py-2 md:px-4 md:py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-colors border border-rose-500/20 flex items-center gap-2 shadow-md"><i class="fa-solid fa-xmark text-sm"></i> <span class="hidden sm:inline">Close</span></button>
+                        </div>
+                    </div>
+                    <iframe id="eval-iframe" class="w-full flex-1 bg-[#0f172a]" src=""></iframe>
+                </div>
+
+                <!-- Grading Panel Area -->
+                <div class="w-full lg:w-2/5 h-[55vh] lg:h-full bg-[var(--bg-panel)] flex flex-col shadow-[-15px_0_40px_rgba(0,0,0,0.1)] relative z-20 backdrop-blur-2xl">
+                    <div class="p-4 md:p-8 border-b border-[var(--border-color)] bg-[var(--bg-input)] shrink-0">
+                        <div class="flex flex-wrap justify-between items-start gap-2 mb-3 md:mb-4">
+                            <span class="text-[9px] md:text-[10px] font-black text-[var(--accent-primary)] uppercase tracking-widest bg-[var(--bg-hover)] px-3 py-1.5 rounded-full border border-[var(--border-light)] shadow-sm whitespace-nowrap" id="eval-mode-badge">Evaluation Mode</span>
+                            
+                            <!-- Shrunk EXAM-ID Badge -->
+                            <span class="text-[8px] md:text-[9px] font-black text-[var(--text-muted)] uppercase tracking-widest bg-[var(--bg-main)] border border-[var(--border-color)] px-2.5 py-1 rounded-md break-all shadow-sm max-w-[120px] truncate" id="eval-exam-id">EXAM-ID</span>
+                        </div>
+                        <h3 class="font-black text-xl md:text-2xl tracking-tight text-[var(--text-main)] mb-1 truncate" id="eval-student-name">Student Name</h3>
+                        <p class="text-xs font-bold text-[var(--text-muted)] mb-4 md:mb-6 uppercase tracking-widest truncate"><i class="fa-regular fa-id-card mr-2 text-[var(--accent-primary)]"></i> Roll: <span id="eval-student-roll">...</span></p>
+                        
+                        <div class="flex justify-between items-center bg-[var(--bg-hover)] p-4 md:p-5 rounded-2xl border border-[var(--border-color)] shadow-inner">
+                            <span class="text-xs font-black uppercase tracking-widest text-[var(--text-muted)]">Calculated Score</span>
+                            <span class="text-2xl md:text-3xl font-black text-[var(--text-main)]"><span id="eval-total-obtained" class="glowing-text">0</span> <span class="text-sm md:text-lg text-[var(--text-muted)] font-bold">/ <span id="eval-total-max">0</span></span></span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex-1 overflow-y-auto p-4 md:p-8 space-y-4 md:space-y-5 bg-[var(--bg-main)] custom-scrollbar" id="eval-questions-container">
+                        <!-- Questions injected dynamically -->
+                    </div>
+                    
+                    <div class="p-4 md:p-8 border-t border-[var(--border-color)] bg-[var(--bg-panel)] space-y-4 md:space-y-5 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] shrink-0">
+                        <div>
+                            <label class="block text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-2 pl-1">Overall Remarks</label>
+                            <textarea id="eval-overall-feedback" placeholder="General feedback for the student..." class="input-field w-full p-3 md:p-4 rounded-xl text-sm font-bold resize-none shadow-inner" rows="2"></textarea>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 md:gap-4">
+                            <button onclick="submitEvaluation('In Review')" class="w-full bg-[var(--bg-input)] border border-[var(--border-color)] text-[var(--text-main)] font-black text-[10px] md:text-xs uppercase tracking-widest py-3 md:py-4 rounded-xl hover:bg-amber-50 dark:hover:bg-amber-900/20 hover:text-amber-600 hover:border-amber-200 transition-all shadow-sm hover:-translate-y-1">Save Draft</button>
+                            <button onclick="submitEvaluation('Checked')" id="eval-submit-btn" class="w-full action-button font-black text-[10px] md:text-xs uppercase tracking-widest py-3 md:py-4 rounded-xl shadow-lg hover:-translate-y-1">Publish</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, getDocs, doc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const fallbackConfig = { apiKey: "AIzaSyA2jVz1N1Pepkoa4qX2FwU99xw10cCvjv8", authDomain: "u-eos-19ad8.firebaseapp.com", projectId: "u-eos-19ad8", storageBucket: "u-eos-19ad8.firebasestorage.app", messagingSenderId: "891014710643", appId: "1:891014710643:web:d0e58a3962dbe136227106" };
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : fallbackConfig;
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'auos-demo-app';
+
+        let currentUser = null;
+        let teacherProfileData = null;
+        let allAssignments = [];
+        let currentEvalId = null;
+
+        const html = document.documentElement;
+        if (localStorage.getItem('theme') === 'dark') html.classList.add('dark');
+        window.toggleTheme = () => { 
+            html.classList.toggle('dark'); 
+            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light'); 
+        };
+
+        window.toggleMobileSidebar = () => {
+            const sidebar = document.querySelector('aside');
+            const overlay = document.getElementById('mobile-sidebar-overlay');
+            if (sidebar && overlay) {
+                sidebar.classList.toggle('mobile-open');
+                overlay.classList.toggle('active');
+            }
+        };
+
+        window.handleLogin = async () => {
+            const email = document.getElementById('login-email').value;
+            const pass = document.getElementById('login-pass').value;
+            const btn = document.getElementById('login-btn');
+            const err = document.getElementById('login-error');
+            try {
+                err.classList.add('hidden');
+                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Verifying...`;
+                await signInWithEmailAndPassword(auth, email, pass);
+            } catch(e) { 
+                err.textContent = "Authentication Failed: Check your credentials."; 
+                err.classList.remove('hidden'); 
+                btn.innerHTML = `Authenticate Access <i class="fa-solid fa-arrow-right ml-2"></i>`; 
+            }
+        };
+
+        window.logout = () => { signOut(auth).then(() => window.location.reload()); };
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const tq = query(collection(db, 'artifacts', appId, 'public', 'data', 'teachers'), where("email", "==", user.email));
+                const snap = await getDocs(tq);
+                
+                if (snap.empty) {
+                    await signOut(auth);
+                    document.getElementById('login-error').innerHTML = "<i class='fa-solid fa-circle-exclamation'></i> Access Denied. Not authorized as Faculty.";
+                    document.getElementById('login-error').classList.remove('hidden');
+                    return;
+                }
+
+                teacherProfileData = snap.docs[0].data();
+                currentUser = user;
+                
+                const shortName = teacherProfileData.name.split(' ')[0];
+                document.getElementById('auth-name').textContent = teacherProfileData.name;
+                document.getElementById('auth-email').textContent = teacherProfileData.email;
+                document.getElementById('dash-welcome-name').textContent = shortName;
+                
+                document.getElementById('prof-name').textContent = teacherProfileData.name;
+                document.getElementById('prof-email').textContent = teacherProfileData.email;
+                document.getElementById('prof-dept').textContent = teacherProfileData.department || "N/A";
+                document.getElementById('prof-subj').textContent = teacherProfileData.subject || "General";
+
+                document.getElementById('view-login').classList.add('hidden');
+                fetchAssignments();
+            } else {
+                document.getElementById('view-login').classList.remove('hidden');
+            }
+        });
+
+        window.switchTab = (tab) => {
+            ['dashboard', 'assignments', 'checked', 'profile'].forEach(t => {
+                const view = document.getElementById(`view-${t}`);
+                const nav = document.getElementById(`nav-${t}`);
+                if(view) view.classList.add('hidden');
+                if(nav) nav.classList.remove('nav-active');
+            });
+            document.getElementById(`view-${tab}`).classList.remove('hidden');
+            if(document.getElementById(`nav-${tab}`)) document.getElementById(`nav-${tab}`).classList.add('nav-active');
+            
+            const titles = { 'dashboard': 'Overview', 'assignments': 'Pending Sheets', 'checked': 'Grading History', 'profile': 'My Profile' };
+            document.getElementById('page-title').textContent = titles[tab];
+            
+            if (window.innerWidth < 768) toggleMobileSidebar(); 
+        };
+
+        window.filterLists = () => {
+            const pQuery = document.getElementById('search-pending').value.toLowerCase();
+            const cQuery = document.getElementById('search-checked').value.toLowerCase();
+            
+            document.querySelectorAll('.card-pending').forEach(card => {
+                card.style.display = card.innerText.toLowerCase().includes(pQuery) ? 'flex' : 'none';
+            });
+            
+            document.querySelectorAll('.card-checked').forEach(card => {
+                card.style.display = card.innerText.toLowerCase().includes(cQuery) ? 'flex' : 'none';
+            });
+        };
+
+        async function fetchAssignments() {
+            if(!currentUser) return;
+            const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'evaluationAssignments'), where("teacherEmail", "==", currentUser.email));
+            const snap = await getDocs(q);
+            allAssignments = [];
+            let pendingCount = 0, checkedCount = 0;
+            
+            snap.forEach(d => {
+                const data = { id: d.id, ...d.data() };
+                allAssignments.push(data);
+                if(data.status === 'Checked') checkedCount++; else pendingCount++;
+            });
+
+            document.getElementById('stat-assigned').textContent = allAssignments.length;
+            document.getElementById('stat-pending').textContent = pendingCount;
+            document.getElementById('banner-pending-count').textContent = pendingCount;
+            document.getElementById('stat-checked').textContent = checkedCount;
+            
+            const rate = allAssignments.length > 0 ? Math.round((checkedCount / allAssignments.length) * 100) : 0;
+            document.getElementById('stat-rate').textContent = `${rate}%`;
+            
+            renderLists();
+        }
+
+        function renderLists() {
+            const listP = document.getElementById('list-pending');
+            const listC = document.getElementById('list-checked');
+            listP.innerHTML = ''; listC.innerHTML = '';
+
+            allAssignments.forEach((a, index) => {
+                const isChecked = a.status === 'Checked';
+                const isDraft = a.status === 'In Review';
+                const delay = (index % 10) * 0.1; 
+                
+                let statusBadge = "";
+                let cardBorder = "";
+                
+                if (isChecked) {
+                    statusBadge = `<span class="text-[10px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 px-3 py-1 rounded-full border border-emerald-200 dark:border-emerald-800 shadow-sm"><i class="fa-solid fa-check-double mr-1"></i> Published</span>`;
+                    cardBorder = "border-l-8 border-l-emerald-500";
+                } else if (isDraft) {
+                    statusBadge = `<span class="text-[10px] font-black uppercase tracking-widest text-amber-600 bg-amber-50 dark:bg-amber-900/30 px-3 py-1 rounded-full border border-amber-200 dark:border-amber-800 shadow-sm animate-pulse"><i class="fa-solid fa-pen-to-square mr-1"></i> Draft</span>`;
+                    cardBorder = "border-l-8 border-l-amber-500";
+                } else {
+                    statusBadge = `<span class="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] bg-[var(--bg-input)] px-3 py-1 rounded-full border border-[var(--border-color)] shadow-sm"><i class="fa-regular fa-clock mr-1"></i> Pending</span>`;
+                    cardBorder = "border-l-8 border-l-[var(--border-color)]";
+                }
+
+                const cardClass = isChecked ? 'card-checked' : 'card-pending';
+
+                const card = `
+                    <div class="${cardClass} glass-card p-6 rounded-[2rem] ${cardBorder} flex flex-col hover:-translate-y-2 transition-transform duration-300 shadow-sm animate-slide-up" style="animation-delay: ${delay}s">
+                        <div class="flex justify-between items-start mb-4">
+                            <!-- Shrunk EXAM-ID Badge in Card -->
+                            <span class="text-[8px] md:text-[9px] font-black text-[var(--text-muted)] uppercase tracking-widest bg-[var(--bg-input)] px-2.5 py-1 rounded-md border border-[var(--border-light)] shadow-sm truncate max-w-[100px]">${a.examId}</span>
+                            ${statusBadge}
+                        </div>
+                        <h4 class="font-black text-lg text-[var(--text-main)] mb-1 truncate" title="${a.examTitle}">${a.examTitle}</h4>
+                        <p class="text-xs font-bold text-[var(--text-muted)] mb-5 truncate"><i class="fa-solid fa-user-circle mr-1 text-[var(--accent-primary)]"></i> ${a.studentName} <span class="opacity-60">(${a.rollNumber})</span></p>
+                        
+                        <div class="mt-auto pt-5 border-t border-[var(--border-color)] flex justify-between items-center gap-2">
+                            <div class="flex flex-col shrink-0">
+                                <span class="text-[8px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-0.5">Weightage</span>
+                                <span class="text-sm font-black text-[var(--text-main)]">${a.totalMarks} <span class="text-xs font-bold text-[var(--text-muted)]">Marks</span></span>
+                            </div>
+                            ${isChecked 
+                                ? `<div class="flex items-center gap-3 md:gap-4 shrink-0">
+                                     <div class="flex flex-col text-right"><span class="text-[8px] font-black text-emerald-600 uppercase tracking-widest mb-0.5">Scored</span><span class="text-sm font-black text-emerald-600">${a.obtainedTotal} <span class="opacity-50 font-bold">/${a.totalMarks}</span></span></div>
+                                     <button onclick="openEvaluation('${a.id}', true)" title="Edit Score" class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white transition-all flex items-center justify-center border border-amber-200 shadow-sm hover:scale-110"><i class="fa-solid fa-pen text-sm"></i></button>
+                                   </div>`
+                                : `<button onclick="openEvaluation('${a.id}', false)" class="action-button px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-md whitespace-nowrap">Evaluate</button>`
+                            }
+                        </div>
+                    </div>
+                `;
+                if(isChecked) listC.innerHTML += card; else listP.innerHTML += card;
+            });
+            
+            if(!listP.innerHTML) listP.innerHTML = `<div class="col-span-full p-10 text-center glass-card rounded-[2.5rem] border-dashed"><i class="fa-solid fa-mug-hot text-4xl text-[var(--border-light)] mb-3"></i><p class="text-xs font-black text-[var(--text-muted)] uppercase tracking-widest">No pending sheets found</p></div>`;
+            if(!listC.innerHTML) listC.innerHTML = `<div class="col-span-full p-10 text-center glass-card rounded-[2.5rem] border-dashed"><i class="fa-solid fa-box-open text-4xl text-[var(--border-light)] mb-3"></i><p class="text-xs font-black text-[var(--text-muted)] uppercase tracking-widest">Evaluation history is empty</p></div>`;
+        }
+
+        window.openEvaluation = (id, isEditMode = false) => {
+            currentEvalId = id;
+            const a = allAssignments.find(x => x.id === id);
+            if(!a) return;
+
+            document.getElementById('eval-mode-badge').textContent = isEditMode ? "Revaluation Mode" : "Active Grading";
+            document.getElementById('eval-mode-badge').className = isEditMode 
+                ? "text-[9px] md:text-[10px] font-black text-amber-600 bg-amber-50 dark:bg-amber-900/30 px-3 py-1.5 rounded-full border border-amber-200 dark:border-amber-800 uppercase tracking-widest shadow-sm whitespace-nowrap"
+                : "text-[9px] md:text-[10px] font-black text-[var(--accent-primary)] bg-[var(--bg-hover)] px-3 py-1.5 rounded-full border border-[var(--border-light)] uppercase tracking-widest shadow-sm whitespace-nowrap";
+            
+            document.getElementById('eval-submit-btn').innerHTML = isEditMode ? "Update Score" : "Publish Score";
+
+            const qpBtn = document.getElementById('eval-qp-btn');
+            if(a.questionPaperUrl) {
+                qpBtn.classList.remove('hidden');
+                qpBtn.onclick = () => window.open(a.questionPaperUrl, '_blank');
+            } else {
+                qpBtn.classList.add('hidden');
+            }
+
+            document.getElementById('eval-iframe').src = a.answerSheetUrl;
+            document.getElementById('eval-student-name').textContent = a.studentName;
+            document.getElementById('eval-student-roll').textContent = a.rollNumber;
+            document.getElementById('eval-exam-id').textContent = a.examId;
+            document.getElementById('eval-total-max').textContent = a.totalMarks;
+            document.getElementById('eval-overall-feedback').value = a.teacherFeedback || '';
+            
+            const cont = document.getElementById('eval-questions-container');
+            cont.innerHTML = '';
+            
+            const currentMarks = a.marksAwarded || [];
+            (a.questionMarks || []).forEach((q) => {
+                const existing = currentMarks.find(m => m.qNo === q.qNo) || {};
+                cont.innerHTML += `
+                    <div class="glass-card p-4 md:p-5 rounded-[1.5rem] shadow-sm border border-[var(--border-color)] marking-block" data-qno="${q.qNo}" data-max="${q.maxMarks}">
+                        <div class="flex justify-between items-center mb-4 pb-3 border-b border-[var(--border-color)]">
+                            <h5 class="font-black text-sm text-[var(--accent-primary)] uppercase tracking-widest flex items-center">
+                                <div class="inline-flex w-7 h-7 rounded-lg bg-red-50 dark:bg-red-900/30 items-center justify-center mr-2 text-red-500 shadow-inner"><i class="fa-solid fa-crosshairs text-[10px]"></i></div> 
+                                Q.${q.qNo}
+                            </h5>
+                            <span class="text-[10px] font-black text-[var(--text-muted)] bg-[var(--bg-input)] px-3 py-1.5 rounded-lg border border-[var(--border-light)] shadow-inner uppercase tracking-widest">Max: ${q.maxMarks}</span>
+                        </div>
+                        <div class="grid grid-cols-[auto_1fr] gap-3 items-center mb-3">
+                            <span class="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest w-12 text-right">Score</span>
+                            <div class="relative">
+                                <input type="number" min="0" max="${q.maxMarks}" step="0.5" value="${existing.obtainedMarks !== undefined ? existing.obtainedMarks : ''}" oninput="calcLiveTotal()" class="q-mark input-field w-full h-12 rounded-xl text-center text-lg font-black shadow-inner" placeholder="0.0">
+                            </div>
+                        </div>
+                        <textarea placeholder="Add specific feedback for Q${q.qNo} (optional)..." class="q-feed w-full input-field p-3 text-xs font-bold rounded-xl resize-none shadow-inner" rows="2">${existing.feedback || ''}</textarea>
+                    </div>
+                `;
+            });
+            
+            calcLiveTotal();
+            document.getElementById('view-evaluate').classList.remove('hidden');
+            document.body.classList.add('overflow-hidden'); 
+        };
+
+        window.closeEvaluation = () => { 
+            document.getElementById('view-evaluate').classList.add('hidden'); 
+            document.getElementById('eval-iframe').src = ""; 
+            currentEvalId = null; 
+            document.body.classList.remove('overflow-hidden');
+        };
+
+        window.calcLiveTotal = () => {
+            let total = 0;
+            document.querySelectorAll('.q-mark').forEach(inp => {
+                const v = parseFloat(inp.value);
+                if(!isNaN(v) && v >= 0) total += v;
+            });
+            document.getElementById('eval-total-obtained').textContent = total;
+            return total;
+        };
+
+        window.submitEvaluation = async (status) => {
+            if(!currentEvalId) return;
+            const btn = document.getElementById('eval-submit-btn');
+            const originalText = btn.innerHTML;
+            
+            const blocks = document.querySelectorAll('.marking-block');
+            let marksAwarded = [];
+            let totalObtained = 0;
+            let isValid = true;
+
+            blocks.forEach(b => {
+                const qNo = parseInt(b.dataset.qno);
+                const max = parseFloat(b.dataset.max);
+                const inp = b.querySelector('.q-mark').value;
+                const feed = b.querySelector('.q-feed').value;
+                
+                if (status === 'Checked' && inp === '') isValid = false; 
+                
+                const val = parseFloat(inp);
+                if (!isNaN(val)) {
+                    if (val < 0 || val > max) isValid = false;
+                    totalObtained += val;
+                    marksAwarded.push({ qNo, maxMarks: max, obtainedMarks: val, feedback: feed });
+                }
+            });
+
+            if (!isValid) return alert(status === 'Checked' ? "Error: Please ensure every question has a valid numerical score (between 0 and its max limit) before publishing." : "Invalid marks detected.");
+
+            const payload = {
+                status: status,
+                obtainedTotal: totalObtained,
+                marksAwarded: marksAwarded,
+                teacherFeedback: document.getElementById('eval-overall-feedback').value,
+                publishedToStudent: true 
+            };
+            if(status === 'Checked') payload.checkedAt = new Date().toISOString();
+
+            try {
+                if(status === 'Checked') btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Syncing...`;
+                
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'evaluationAssignments', currentEvalId), payload);
+                
+                closeEvaluation();
+                fetchAssignments();
+            } catch(e) { 
+                console.error(e); 
+                alert("Network Error: Could not save evaluation. " + e.message); 
+                btn.innerHTML = originalText;
+            }
+        };
+    </script>
+</body>
+</html>
