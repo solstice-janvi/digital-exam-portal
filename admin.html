@@ -182,17 +182,60 @@
         /* Mobile Sidebar Overlay */
       /* Mobile Sidebar Layout */
         .mobile-overlay { display: none; }
-        @media (max-width: 768px) {
-            .mobile-overlay.active { display: block; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); z-index: 35; backdrop-filter: blur(4px); }
-            aside { transform: translateX(-100%); position: fixed; height: 100%; top: 0; left: 0; }
+       @media (max-width: 768px) {
+            .mobile-overlay.active { display: block; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); z-index: 40; backdrop-filter: blur(4px); }
+            aside { 
+                transform: translateX(-100%); 
+                position: fixed !important; /* <--- Forces it out of Flexbox flow */
+                height: 100%; 
+                top: 0; 
+                left: 0; 
+                z-index: 50 !important; 
+            }
             aside.mobile-open { transform: translateX(0); }
+        }
+
+        /* Mobile Card-Based Tables (Removes Horizontal Scroll) */
+        @media (max-width: 768px) {
+            .overflow-x-auto table { min-width: 100% !important; }
+            .overflow-x-auto thead { display: none; }
+            .overflow-x-auto tbody, .overflow-x-auto tr, .overflow-x-auto td { display: block; width: 100%; }
+            
+            .overflow-x-auto tr {
+                background: var(--bg-panel);
+                border: 1px solid var(--border-color);
+                border-radius: 1rem;
+                margin-bottom: 1rem;
+                padding: 1rem;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            }
+            
+            .overflow-x-auto td {
+                text-align: left !important;
+                padding: 0.5rem 0 !important;
+                border: none !important;
+                display: flex;
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+            
+            /* Align the action buttons properly at the bottom of the card */
+            .overflow-x-auto td:last-child {
+                flex-direction: row;
+                justify-content: flex-start !important;
+                flex-wrap: wrap; /* Allows buttons to wrap to a new line */
+                gap: 0.5rem; /* Ensures spacing when they wrap */
+                margin-top: 0.5rem;
+                padding-top: 1rem !important;
+                border-top: 1px solid var(--border-light) !important;
+            }
         }
     </style>
 </head>
 <body class="text-slate-800 dark:text-slate-200 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] bg-fixed flex h-screen overflow-hidden transition-colors duration-500">
 
     <!-- Global Toast Notifications Container -->
-    <div id="admin-toasts" class="fixed bottom-5 right-5 z-[1000] flex flex-col gap-3 pointer-events-none"></div>
+   <div id="admin-toasts" class="fixed bottom-4 right-4 sm:bottom-5 sm:right-5 z-[1000] flex flex-col gap-3 pointer-events-none items-end max-w-[calc(100vw-2rem)]"></div>
 
     <!-- Ambient Orbs -->
     <div class="bg-orb orb-1" aria-hidden="true"></div>
@@ -338,14 +381,16 @@
     <!-- Main Content -->
     <main class="flex-1 flex flex-col h-screen overflow-y-auto relative" id="main-content">
         
-     <header class="glass-panel px-6 lg:px-10 py-6 flex justify-between items-center sticky top-0 z-20 shadow-sm rounded-none border-x-0 border-t-0" id="top-bar">
-           <div class="flex items-center gap-3">
-        <button class="md:hidden text-2xl text-[var(--text-main)] hover:text-[var(--accent-primary)] transition-colors" onclick="toggleMobileSidebar()">
-            <i class="fa-solid fa-bars"></i>
-        </button>
-        <h2 class="text-2xl font-black glowing-text tracking-tight hidden sm:block" id="page-title">Admin Dashboard</h2>
-    </div>
-            <div class="flex items-center gap-4 lg:gap-6 relative">
+    <header class="glass-panel px-6 lg:px-10 py-6 flex justify-between items-center sticky top-0 z-20 shadow-sm rounded-none border-x-0 border-t-0" id="top-bar">
+            <div class="flex items-center gap-3">
+                <button class="md:hidden text-2xl text-[var(--text-main)] hover:text-[var(--accent-primary)] transition-colors" onclick="toggleMobileSidebar()">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <h2 class="text-2xl font-black glowing-text tracking-tight hidden sm:block" id="page-title">Admin Dashboard</h2>
+            </div>
+            
+            <div class="flex items-center gap-3 sm:gap-6 relative">
+                <div class="relative">
                     <button onclick="document.getElementById('admin-notif-dropdown').classList.toggle('hidden')" class="w-10 h-10 rounded-full bg-[var(--bg-input)] border border-[var(--border-color)] text-[var(--text-main)] flex items-center justify-center hover:text-[var(--accent-primary)] transition-all shadow-sm relative">
                         <i class="fa-solid fa-bell"></i>
                         <span id="admin-notif-badge" class="hidden absolute top-0 right-0 w-3 h-3 bg-rose-500 rounded-full animate-pulse border-2 border-[var(--bg-panel)]"></span>
@@ -361,13 +406,13 @@
                     </div>
                 </div>
 
-                <button onclick="logoutAdmin()" class="bg-[var(--bg-input)] border border-[var(--border-color)] text-[var(--text-main)] px-5 py-2.5 rounded-xl text-sm font-black shadow-sm hover:shadow-md hover:text-[var(--accent-primary)] hover:border-[var(--accent-primary)] transition-all flex items-center gap-2 group">
-                    <i class="fa-solid fa-power-off group-hover:animate-pulse"></i> Sign Out
+                <button onclick="logoutAdmin()" class="bg-[var(--bg-input)] border border-[var(--border-color)] text-[var(--text-main)] px-3 sm:px-5 py-2.5 rounded-xl text-sm font-black shadow-sm hover:shadow-md hover:text-[var(--accent-primary)] hover:border-[var(--accent-primary)] transition-all flex items-center gap-2 group">
+                    <i class="fa-solid fa-power-off group-hover:animate-pulse"></i> <span class="hidden sm:inline">Sign Out</span>
                 </button>
             </div>
         </header>
 
-        <div class="p-10 flex-1 w-full max-w-[1400px] mx-auto space-y-10 relative z-0">
+        <div class="p-4 md:p-10 flex-1 w-full max-w-[1400px] mx-auto space-y-6 md:space-y-10 relative z-0">
             
             <!-- VIEW: DASHBOARD -->
             <div id="view-dashboard" class="block space-y-10 animate-fade-in">
@@ -427,12 +472,12 @@
 
 
 <div id="view-teachers" class="hidden space-y-8 animate-fade-in">
-    <div class="flex justify-between items-end mb-2">
-        <div>
-            <h3 class="text-3xl font-black text-[var(--text-main)] tracking-tight">Faculty Directory</h3>
-            <p class="text-[var(--text-muted)] text-sm mt-2 font-medium">Manage teacher profiles for manual sheet evaluation.</p>
-        </div>
-        <button onclick="document.getElementById('modal-add-teacher').classList.add('active')" class="action-button px-6 py-3.5 rounded-2xl text-sm flex items-center gap-2">
+   <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-4 gap-4">
+    <div>
+        <h3 class="text-3xl font-black text-[var(--text-main)] tracking-tight">Faculty Directory</h3>
+        <p class="text-[var(--text-muted)] text-sm mt-2 font-medium">Manage teacher profiles for manual sheet evaluation.</p>
+    </div>
+    <button onclick="document.getElementById('modal-add-teacher').classList.add('active')" class="w-full md:w-auto action-button px-6 py-3.5 rounded-2xl text-sm flex items-center justify-center gap-2">
             <i class="fa-solid fa-user-plus"></i> Add Teacher Profile
         </button>
     </div>
@@ -441,10 +486,10 @@
             <table class="w-full text-left border-collapse min-w-[800px]">
                 <thead>
                     <tr class="bg-[var(--bg-input)] text-[var(--text-muted)] text-[10px] uppercase tracking-widest border-b border-[var(--border-color)]">
-                        <th class="p-6 font-black pl-8">Teacher Name</th>
-                        <th class="p-6 font-black">Auth Email</th>
-                        <th class="p-6 font-black">Department & Subject</th>
-                        <th class="p-6 font-black text-right pr-8">Status</th>
+                        <th class="p-3 md:p-6 font-black pl-4 md:pl-8">Teacher Name</th>
+                        <th class="p-3 md:p-6 font-black">Auth Email</th>
+                        <th class="p-3 md:p-6 font-black">Department & Subject</th>
+                        <th class="p-3 md:p-6 font-black text-right pr-4 md:pr-8">Status</th>
                     </tr>
                 </thead>
                 <tbody id="table-teachers" class="divide-y divide-[var(--border-color)]"></tbody>
@@ -468,10 +513,10 @@
          <table class="w-full text-left border-collapse min-w-[900px]">
             <thead>
                 <tr class="bg-[var(--bg-input)] text-[var(--text-muted)] text-[10px] uppercase tracking-widest border-b border-[var(--border-color)]">
-                    <th class="p-6 font-black pl-8">Exam & Student</th>
-                    <th class="p-6 font-black">Assigned Teacher</th>
-                    <th class="p-6 font-black">Status & Marks</th>
-                    <th class="p-6 font-black text-right pr-8">Actions</th>
+                    <th class="p-3 md:p-6 font-black pl-4 md:pl-8">Exam & Student</th>
+                    <th class="p-3 md:p-6 font-black">Assigned Teacher</th>
+                    <th class="p-3 md:p-6 font-black">Status & Marks</th>
+                    <th class="p-3 md:p-6 font-black text-right pr-4 md:pr-8">Actions</th>
                 </tr>
             </thead>
             <tbody id="table-assignments" class="divide-y divide-[var(--border-color)]"></tbody>
@@ -482,12 +527,12 @@
 
             <!-- VIEW: STUDENTS REGISTRY (ERP) -->
             <div id="view-students" class="hidden space-y-8 animate-fade-in">
-                <div class="flex justify-between items-end mb-2">
-                    <div>
-                        <h3 class="text-3xl font-black text-[var(--text-main)] tracking-tight">Student Directory</h3>
-                        <p class="text-[var(--text-muted)] text-sm mt-2 font-medium">Manage ERP enrollments, sections, and authentications.</p>
-                    </div>
-                    <div class="flex gap-3">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-4 gap-4">
+    <div>
+        <h3 class="text-3xl font-black text-[var(--text-main)] tracking-tight">Student Directory</h3>
+        <p class="text-[var(--text-muted)] text-sm mt-2 font-medium">Manage ERP enrollments, sections, and authentications.</p>
+    </div>
+    <div class="flex flex-wrap gap-3 w-full md:w-auto">
                         <input type="file" id="csv-upload" accept=".csv" class="hidden">
                         <button onclick="exportStudentsCSV()" class="bg-[var(--bg-input)] border border-[var(--border-color)] text-[var(--text-main)] px-5 py-3.5 rounded-2xl text-sm font-black shadow-sm hover:text-emerald-500 hover:border-emerald-500 transition-all flex items-center gap-2">
                             <i class="fa-solid fa-file-export"></i> Export CSV
@@ -504,12 +549,12 @@
                 <div class="glass-card rounded-[2.5rem] overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse min-w-[900px]">
-                                <tr class="bg-[var(--bg-input)] text-[var(--text-muted)] text-[10px] uppercase tracking-widest border-b border-[var(--border-color)]">
-                                    <th class="p-6 font-black pl-8">Identity & Roll</th>
-                                    <th class="p-6 font-black">Full Name</th>
-                                    <th class="p-6 font-black">School & Section</th>
-                                    <th class="p-6 font-black">Auth Email</th>
-                                    <th class="p-6 font-black text-right pr-8">Management</th>
+                               <tr class="bg-[var(--bg-input)] text-[var(--text-muted)] text-[10px] uppercase tracking-widest border-b border-[var(--border-color)]">
+    <th class="p-3 md:p-6 font-black pl-4 md:pl-8">Identity & Roll</th>
+    <th class="p-3 md:p-6 font-black">Full Name</th>
+    <th class="p-3 md:p-6 font-black">School & Section</th>
+                                    <th class="p-3 md:p-6 font-black">Auth Email</th>
+                                    <th class="p-3 md:p-6 font-black text-right pr-4 md:pr-8">Management</th>
                                 </tr>
                             </thead>
                             <tbody id="table-students" class="divide-y divide-[var(--border-color)]">
@@ -558,12 +603,12 @@
 
             <!-- VIEW: ERP DOCS (SEATING & RESULTS) -->
             <div id="view-erp-docs" class="hidden space-y-8 animate-fade-in">
-                <div class="flex justify-between items-end mb-2">
-                    <div>
-                        <h3 class="text-3xl font-black text-[var(--text-main)] tracking-tight">ERP Resource Links</h3>
-                        <p class="text-[var(--text-muted)] text-sm mt-2 font-medium">Upload URLs for Seating Plans, Semester Results, and Documents with exact targeting.</p>
-                    </div>
-                    <div class="flex gap-3">
+               <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-4 gap-4">
+    <div>
+        <h3 class="text-3xl font-black text-[var(--text-main)] tracking-tight">ERP Resource Links</h3>
+        <p class="text-[var(--text-muted)] text-sm mt-2 font-medium">Upload URLs for Seating Plans, Semester Results, and Documents with exact targeting.</p>
+    </div>
+    <div class="flex flex-wrap gap-3 w-full md:w-auto">
                         <button onclick="openAddErpDocModal()" class="action-button px-6 py-3.5 rounded-2xl text-sm flex items-center gap-2">
                             <i class="fa-solid fa-link"></i> Add Resource Data
                         </button>
@@ -574,10 +619,10 @@
                         <table class="w-full text-left border-collapse min-w-[900px]">
                             <thead>
                                 <tr class="bg-[var(--bg-input)] text-[var(--text-muted)] text-[10px] uppercase tracking-widest border-b border-[var(--border-color)]">
-                                    <th class="p-6 font-black pl-8">Resource Info</th>
-                                    <th class="p-6 font-black">Academic Target</th>
-                                    <th class="p-6 font-black">Specific Target (Sec/Roll)</th>
-                                    <th class="p-6 font-black text-right pr-8">Actions</th>
+                                    <th class="p-3 md:p-6 font-black pl-4 md:pl-8">Resource Info</th>
+                                    <th class="p-3 md:p-6 font-black">Academic Target</th>
+                                    <th class="p-3 md:p-6 font-black">Specific Target (Sec/Roll)</th>
+                                    <th class="p-3 md:p-6 font-black text-right pr-4 md:pr-8">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="table-erp-docs" class="divide-y divide-[var(--border-color)]">
@@ -601,11 +646,11 @@
                         <table class="w-full text-left border-collapse min-w-[900px]">
                             <thead>
                                 <tr class="bg-[var(--bg-input)] text-[var(--text-muted)] text-[10px] uppercase tracking-widest border-b border-[var(--border-color)]">
-                                    <th class="p-6 font-black pl-8">Student Info</th>
-                                    <th class="p-6 font-black">Course & Section</th>
-                                    <th class="p-6 font-black text-center">Attendance (%)</th>
-                                    <th class="p-6 font-black text-center">Fee Dues ($/₹)</th>
-                                    <th class="p-6 font-black text-right pr-8">Actions</th>
+                                    <th class="p-3 md:p-6 font-black pl-4 md:pl-8">Student Info</th>
+                                    <th class="p-3 md:p-6 font-black">Course & Section</th>
+                                    <th class="p-3 md:p-6 font-black text-center">Attendance (%)</th>
+                                    <th class="p-3 md:p-6 font-black text-center">Fee Dues ($/₹)</th>
+                                    <th class="p-3 md:p-6 font-black text-right pr-4 md:pr-8">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="table-fees" class="divide-y divide-[var(--border-color)]">
@@ -623,8 +668,8 @@
                         <h3 class="text-3xl font-black text-[var(--text-main)] tracking-tight">Examination Engine</h3>
                         <p class="text-[var(--text-muted)] text-sm mt-2 font-medium">Design, secure, and deploy assessment protocols.</p>
                     </div>
-                    <div class="flex gap-4">
-                        <select id="filter-exam-school" onchange="renderExams()" class="pl-4 pr-10 py-3 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-panel)] text-sm shadow-sm outline-none font-bold text-[var(--text-main)]">
+                  <div class="flex flex-wrap gap-3 w-full md:w-auto">
+        <select id="filter-exam-school" onchange="renderExams()" class="flex-1 md:flex-none pl-4 pr-10 py-3 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-panel)] text-sm shadow-sm outline-none font-bold text-[var(--text-main)]">
                             <option value="all">All Schools</option>
                         </select>
                         <select id="filter-exam-section" onchange="renderExams()" class="pl-4 pr-10 py-3 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-panel)] text-sm shadow-sm outline-none font-bold text-[var(--text-main)]">
@@ -648,8 +693,8 @@
                         <h3 class="text-3xl font-black text-[var(--text-main)] tracking-tight">Real-Time Monitor</h3>
                         <p class="text-[var(--text-muted)] text-sm mt-2 font-medium">Listen to active sessions, auto-saves, security violations, and live screens.</p>
                     </div>
-                    <div class="flex items-center gap-4">
-                        <select id="live-filter-school" onchange="renderLiveTable()" class="pl-4 pr-8 py-3 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-panel)] text-sm shadow-sm outline-none">
+                   <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+        <select id="live-filter-school" onchange="renderLiveTable()" class="flex-1 md:flex-none pl-4 pr-8 py-3 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-panel)] text-sm shadow-sm outline-none">
                             <option value="all">All Schools</option>
                         </select>
                         <select id="live-filter-section" onchange="renderLiveTable()" class="pl-4 pr-8 py-3 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-panel)] text-sm shadow-sm outline-none">
@@ -667,12 +712,12 @@
                         <table class="w-full text-left border-collapse min-w-[900px]">
                             <thead>
                                 <tr class="bg-[var(--bg-input)] text-[var(--text-muted)] text-[10px] uppercase tracking-widest border-b border-[var(--border-color)]">
-                                    <th class="p-6 font-black pl-8">Student & Info</th>
-                                    <th class="p-6 font-black">Exam Protocol</th>
-                                    <th class="p-6 font-black">Live Status</th>
-                                    <th class="p-6 font-black">Security Audit</th>
-                                    <th class="p-6 font-black">Save State</th>
-                                    <th class="p-6 font-black text-right pr-8">Live Controls</th>
+                                    <th class="p-3 md:p-6 font-black pl-4 md:pl-8">Student & Info</th>
+                                    <th class="p-3 md:p-6 font-black">Exam Protocol</th>
+                                    <th class="p-3 md:p-6 font-black">Live Status</th>
+                                    <th class="p-3 md:p-6 font-black">Security Audit</th>
+                                    <th class="p-3 md:p-6 font-black">Save State</th>
+                                    <th class="p-3 md:p-6 font-black text-right pr-4 md:pr-8">Live Controls</th>
                                 </tr>
                             </thead>
                             <tbody id="live-table" class="divide-y divide-[var(--border-color)]">
@@ -697,11 +742,11 @@
                         <table class="w-full text-left border-collapse min-w-[900px]">
                             <thead>
                                 <tr class="bg-[var(--bg-input)] text-[var(--text-muted)] text-[10px] uppercase tracking-widest border-b border-[var(--border-color)]">
-                                    <th class="p-6 font-black pl-8">Protocol ID</th>
-                                    <th class="p-6 font-black">Student Details</th>
-                                    <th class="p-6 font-black">Status & Timestamp</th>
-                                    <th class="p-6 font-black">Security Audit</th>
-                                    <th class="p-6 font-black text-right pr-8">Actions</th>
+                                    <th class="p-3 md:p-6 font-black pl-4 md:pl-8">Protocol ID</th>
+                                    <th class="p-3 md:p-6 font-black">Student Details</th>
+                                    <th class="p-3 md:p-6 font-black">Status & Timestamp</th>
+                                    <th class="p-3 md:p-6 font-black">Security Audit</th>
+                                    <th class="p-3 md:p-6 font-black text-right pr-4 md:pr-8">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="table-evaluations" class="divide-y divide-[var(--border-color)]">
@@ -734,13 +779,13 @@
     <!-- Admin Profile Modal -->
     <div id="modal-admin-profile" class="modal-overlay fixed inset-0 bg-slate-950/80 backdrop-blur-xl z-[150] items-center justify-center p-4">
         <div class="glass-card rounded-[2.5rem] shadow-2xl max-w-sm w-full overflow-hidden border-t-4 border-t-[var(--accent-primary)]">
-            <div class="bg-[var(--bg-panel)] p-8 flex justify-between items-center border-b border-[var(--border-color)]">
+            <div class="bg-[var(--bg-panel)] p-4 sm:p-8 flex justify-between items-center border-b border-[var(--border-color)]">
                 <h3 class="text-2xl font-black text-[var(--text-main)] tracking-tight flex items-center gap-3">
                     <div class="w-10 h-10 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] flex items-center justify-center text-[var(--accent-primary)] shadow-inner"><i class="fa-solid fa-user-gear"></i></div> Admin Profile
                 </h3>
                 <button onclick="closeModal('modal-admin-profile')" class="w-10 h-10 bg-[var(--bg-input)] border border-[var(--border-color)] text-[var(--text-muted)] rounded-full hover:bg-[var(--accent-primary)] hover:text-white transition-all shadow-sm flex items-center justify-center text-lg"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="p-8 space-y-5 bg-[var(--bg-panel)]">
+            <div class="p-4 sm:p-8 space-y-5 bg-[var(--bg-panel)]">
                 <div><label class="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest block mb-1">Display Name</label><input type="text" id="admin-prof-name" class="w-full px-4 py-3.5 rounded-2xl shadow-inner font-bold"></div>
                 <div><label class="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest block mb-1">Email (Read Only)</label><input type="email" id="admin-prof-email" class="w-full px-4 py-3.5 rounded-2xl shadow-inner opacity-60 cursor-not-allowed" disabled></div>
                 <div class="pt-6 border-t border-[var(--border-color)]">
@@ -753,13 +798,13 @@
     <!-- Notice Modal -->
     <div id="modal-notice" class="modal-overlay fixed inset-0 bg-slate-950/80 backdrop-blur-xl z-[150] items-center justify-center p-4">
         <div class="glass-card rounded-[2.5rem] shadow-2xl max-w-md w-full overflow-hidden border-t-4 border-t-amber-500">
-            <div class="bg-[var(--bg-panel)] p-8 flex justify-between items-center border-b border-[var(--border-color)]">
+            <div class="bg-[var(--bg-panel)] p-4 sm:p-8 flex justify-between items-center border-b border-[var(--border-color)]">
                 <h3 class="text-2xl font-black text-[var(--text-main)] tracking-tight flex items-center gap-3" id="modal-notice-title">
                     <div class="w-10 h-10 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] flex items-center justify-center text-amber-500 shadow-inner"><i class="fa-solid fa-bullhorn"></i></div> Announcement
                 </h3>
                 <button onclick="closeModal('modal-notice')" class="w-10 h-10 bg-[var(--bg-input)] border border-[var(--border-color)] text-[var(--text-muted)] rounded-full hover:bg-rose-500 hover:text-white transition-all shadow-sm flex items-center justify-center text-lg"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="p-8 space-y-5 bg-[var(--bg-panel)]">
+            <div class="p-4 sm:p-8 space-y-5 bg-[var(--bg-panel)]">
                 <div><label class="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest block mb-1">Notice Title</label><input type="text" id="notice-title" class="w-full px-4 py-3.5 rounded-2xl shadow-inner font-bold" placeholder="e.g. Holiday Alert"></div>
                 <div><label class="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest block mb-1">Message Content</label><textarea id="notice-content" class="w-full px-4 py-3.5 rounded-2xl shadow-inner resize-none h-32 text-sm" placeholder="Details..."></textarea></div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -776,13 +821,13 @@
     <!-- ERP Doc Modal -->
     <div id="modal-erp-doc" class="modal-overlay fixed inset-0 bg-slate-950/80 backdrop-blur-xl z-[150] items-center justify-center p-4">
         <div class="glass-card rounded-[2.5rem] shadow-2xl max-w-2xl w-full overflow-hidden border-t-4 border-t-indigo-500">
-            <div class="bg-[var(--bg-panel)] p-8 flex justify-between items-center border-b border-[var(--border-color)]">
+            <div class="bg-[var(--bg-panel)] p-4 sm:p-8 flex justify-between items-center border-b border-[var(--border-color)]">
                 <h3 class="text-2xl font-black text-[var(--text-main)] tracking-tight flex items-center gap-3" id="modal-erp-doc-title">
                     <div class="w-10 h-10 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] flex items-center justify-center text-indigo-500 shadow-inner"><i class="fa-solid fa-link"></i></div> Resource Link Details
                 </h3>
                 <button onclick="closeModal('modal-erp-doc')" class="w-10 h-10 bg-[var(--bg-input)] border border-[var(--border-color)] text-[var(--text-muted)] rounded-full hover:bg-rose-500 hover:text-white transition-all shadow-sm flex items-center justify-center text-lg"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="p-8 space-y-5 bg-[var(--bg-panel)] max-h-[75vh] overflow-y-auto">
+            <div class="p-4 sm:p-8 space-y-5 bg-[var(--bg-panel)] max-h-[75vh] overflow-y-auto">
                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div><label class="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest block mb-1">Resource Type</label>
                         <select id="erp-doc-type" class="w-full px-4 py-3.5 rounded-2xl shadow-inner font-bold" onchange="document.getElementById('cgpa-inputs').style.display = this.value === 'Semester Result' ? 'grid' : 'none';">
@@ -824,13 +869,13 @@
     <!-- Timetable Entry Modal -->
     <div id="modal-timetable" class="modal-overlay fixed inset-0 bg-slate-950/80 backdrop-blur-xl z-[150] items-center justify-center p-4">
         <div class="glass-card rounded-[2.5rem] shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col border-t-4 border-t-emerald-500">
-            <div class="bg-[var(--bg-panel)] p-8 flex justify-between items-center border-b border-[var(--border-color)]">
+            <div class="bg-[var(--bg-panel)] p-4 sm:p-8 flex justify-between items-center border-b border-[var(--border-color)]">
                 <h3 class="text-2xl font-black text-[var(--text-main)] tracking-tight flex items-center gap-3" id="modal-timetable-title">
                     <div class="w-10 h-10 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] flex items-center justify-center text-emerald-500 shadow-inner"><i class="fa-solid fa-calendar-plus"></i></div> Create Full Timetable
                 </h3>
                 <button onclick="closeModal('modal-timetable')" class="w-10 h-10 bg-[var(--bg-input)] border border-[var(--border-color)] text-[var(--text-muted)] rounded-full hover:bg-rose-500 hover:text-white transition-all shadow-sm flex items-center justify-center text-lg"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="p-8 flex-1 overflow-y-auto bg-[var(--bg-panel)]">
+            <div class="p-4 sm:p-8 flex-1 overflow-y-auto bg-[var(--bg-panel)]">
                 
                 <h4 class="font-black text-[var(--text-main)] text-sm uppercase tracking-widest mb-4 border-b border-[var(--border-light)] pb-2 text-emerald-600">Classification Details</h4>
                <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
@@ -859,13 +904,13 @@
     <!-- Add/Edit Student Modal -->
     <div id="modal-add-student" class="modal-overlay fixed inset-0 bg-slate-950/80 backdrop-blur-xl z-[100] items-center justify-center p-4">
         <div class="glass-card rounded-[2.5rem] shadow-2xl max-w-2xl w-full overflow-hidden border-t-4 border-t-[var(--accent-primary)]">
-            <div class="bg-[var(--bg-panel)] p-8 flex justify-between items-center border-b border-[var(--border-color)] relative overflow-hidden">
+            <div class="bg-[var(--bg-panel)] p-4 sm:p-8 flex justify-between items-center border-b border-[var(--border-color)] relative overflow-hidden">
                 <h3 class="text-2xl font-black text-[var(--text-main)] tracking-tight flex items-center gap-3" id="modal-add-student-title">
                     <div class="w-10 h-10 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] flex items-center justify-center text-[var(--accent-primary)] shadow-inner"><i class="fa-solid fa-user-plus"></i></div> Enroll Student
                 </h3>
                 <button onclick="closeModal('modal-add-student')" class="w-10 h-10 bg-[var(--bg-input)] border border-[var(--border-color)] text-[var(--text-muted)] rounded-full hover:bg-[var(--accent-primary)] hover:text-white transition-all shadow-sm flex items-center justify-center text-lg"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="p-8 space-y-5 bg-[var(--bg-panel)] max-h-[75vh] overflow-y-auto">
+          <div class="p-4 sm:p-8 space-y-5 bg-[var(--bg-panel)] max-h-[75vh] overflow-y-auto">
                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div><label class="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest block mb-1">Student ID (Auth)</label><input type="text" id="new-stu-id" placeholder="e.g. STU101" class="w-full px-4 py-3.5 rounded-2xl shadow-inner font-mono font-bold uppercase"></div>
                     <div><label class="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest block mb-1">Full Name</label><input type="text" id="new-stu-name" placeholder="John Doe" class="w-full px-4 py-3.5 rounded-2xl shadow-inner font-bold"></div>
@@ -898,7 +943,7 @@
     <!-- Create/Edit Exam Modal (Updated to DOCX Import) -->
     <div id="modal-create-exam" class="modal-overlay fixed inset-0 bg-slate-950/80 backdrop-blur-xl z-[100] items-center justify-center p-4">
         <div class="glass-card rounded-[2.5rem] shadow-2xl max-w-[1300px] w-full h-[95vh] flex flex-col overflow-hidden border-t-4 border-t-[var(--accent-primary)]">
-            <div class="bg-[var(--bg-panel)] p-8 flex justify-between items-center border-b border-[var(--border-color)] shrink-0 relative">
+            <div class="bg-[var(--bg-panel)] p-4 sm:p-8 flex justify-between items-center border-b border-[var(--border-color)] shrink-0 relative">
                 <h3 class="text-3xl font-black text-[var(--text-main)] tracking-tight flex items-center gap-4">
                     <div class="w-12 h-12 rounded-2xl bg-[var(--bg-input)] border border-[var(--border-color)] flex items-center justify-center text-[var(--accent-primary)] shadow-inner"><i class="fa-solid fa-file-signature"></i></div> Exam Engine Builder
                 </h3>
@@ -907,7 +952,7 @@
             
             <div class="overflow-y-auto flex-1 flex flex-col lg:flex-row gap-0 bg-[var(--bg-main)]">
                 <!-- Config Side -->
-                <div class="w-full lg:w-1/3 p-8 lg:pr-10 border-b lg:border-b-0 lg:border-r border-[var(--border-color)] space-y-6">
+                <div class="w-full lg:w-1/3 p-4 sm:p-8 lg:pr-10 border-b lg:border-b-0 lg:border-r border-[var(--border-color)] space-y-6">
                     <div>
                         <h4 class="font-black text-[var(--text-main)] text-lg mb-4 flex items-center gap-2"><i class="fa-solid fa-sliders text-[var(--accent-primary)]"></i> Core Configuration</h4>
                         <div class="space-y-4">
@@ -1017,7 +1062,7 @@
                 </div>
 
                 <!-- Questions Builder Side -->
-                <div class="w-full lg:w-2/3 flex flex-col h-full bg-[var(--bg-panel)] p-8">
+                <div class="w-full lg:w-2/3 flex flex-col h-full bg-[var(--bg-panel)] p-4 sm:p-8">
                     <div class="flex justify-between items-center border-b border-[var(--border-color)] pb-4 mb-6 flex-wrap gap-4">
                         <h4 class="text-xl font-black text-[var(--text-main)] flex items-center gap-3"><i class="fa-solid fa-layer-group text-[var(--accent-primary)]"></i> Question Bank</h4>
                         <div class="flex gap-3 flex-wrap">
@@ -1042,7 +1087,7 @@
                     </div>
                 </div>
             </div>
-            <div class="p-8 bg-[var(--bg-panel)] border-t border-[var(--border-color)] shrink-0 backdrop-blur-md">
+            <div class="p-4 sm:p-8 bg-[var(--bg-panel)] border-t border-[var(--border-color)] shrink-0 backdrop-blur-md">
                 <button onclick="submitExam()" id="btn-publish-exam" class="w-full action-button text-xl py-5 rounded-2xl flex items-center justify-center gap-3">
                     <i class="fa-solid fa-rocket"></i> Deploy Exam Protocol
                 </button>
@@ -1088,7 +1133,7 @@
     <div id="modal-evaluate" class="modal-overlay fixed inset-0 bg-slate-950/90 backdrop-blur-2xl z-[100] items-center justify-center p-2 sm:p-4">
         <div class="glass-card rounded-[2rem] sm:rounded-[2.5rem] shadow-2xl max-w-[1400px] w-full h-[98vh] sm:h-[95vh] border-t-4 border-[var(--accent-primary)] flex flex-col overflow-hidden">
             <header class="bg-[var(--bg-panel)] p-4 sm:p-6 md:p-8 flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-[var(--border-color)] shrink-0 relative overflow-hidden gap-4">
-                <div class="flex items-center gap-4 sm:gap-5 relative z-10 w-full sm:w-auto">
+              <div class="flex items-center gap-4 sm:gap-5 relative z-10 w-full sm:w-auto pr-12 sm:pr-0">
                     <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-[var(--bg-input)] border border-[var(--border-color)] flex items-center justify-center text-[var(--accent-primary)] text-xl sm:text-2xl shadow-inner shrink-0"><i class="fa-solid fa-clipboard-check"></i></div>
                     <div class="overflow-hidden w-full">
                         <h3 class="text-xl sm:text-2xl md:text-3xl font-black text-[var(--text-main)] tracking-tight truncate">Grading Interface</h3>
@@ -1202,11 +1247,11 @@
 
 <div id="modal-add-teacher" class="modal-overlay fixed inset-0 bg-slate-950/80 backdrop-blur-xl z-[150] items-center justify-center p-4">
     <div class="glass-card rounded-[2.5rem] shadow-2xl max-w-md w-full overflow-hidden border-t-4 border-t-purple-500">
-        <div class="bg-[var(--bg-panel)] p-8 flex justify-between items-center border-b border-[var(--border-color)]">
+        <div class="bg-[var(--bg-panel)] p-4 sm:p-8 flex justify-between items-center border-b border-[var(--border-color)]">
             <h3 class="text-2xl font-black text-[var(--text-main)] flex items-center gap-3" id="modal-teacher-title"><div class="w-10 h-10 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] flex items-center justify-center text-purple-500 shadow-inner"><i class="fa-solid fa-chalkboard-user"></i></div> Add Teacher</h3>
             <button onclick="closeModal('modal-add-teacher')" class="w-8 h-8 rounded-full bg-[var(--bg-input)] text-[var(--text-muted)] hover:text-white hover:bg-rose-500 shadow-sm flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
         </div>
-        <div class="p-8 space-y-4 bg-[var(--bg-panel)]">
+        <div class="p-4 sm:p-8 space-y-4 bg-[var(--bg-panel)]">
            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div><label class="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest block mb-1">Teacher ID</label><input type="text" id="new-t-id" class="w-full px-4 py-3 rounded-xl shadow-inner font-bold font-mono uppercase" placeholder="e.g. TCH101"></div>
                 <div><label class="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest block mb-1">Full Name</label><input type="text" id="new-t-name" class="w-full px-4 py-3 rounded-xl shadow-inner font-bold" placeholder="e.g. Jane Doe"></div>
@@ -1227,11 +1272,11 @@
 
 <div id="modal-assign-sheet" class="modal-overlay fixed inset-0 bg-slate-950/80 backdrop-blur-xl z-[150] items-center justify-center p-4">
     <div class="glass-card rounded-[2.5rem] shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden border-t-4 border-t-indigo-500">
-        <div class="bg-[var(--bg-panel)] p-8 flex justify-between items-center border-b border-[var(--border-color)] shrink-0">
+        <div class="bg-[var(--bg-panel)] p-4 sm:p-8 flex justify-between items-center border-b border-[var(--border-color)] shrink-0">
             <h3 class="text-2xl font-black text-[var(--text-main)] flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] flex items-center justify-center text-indigo-500 shadow-inner"><i class="fa-solid fa-file-signature"></i></div> Assign Sheet</h3>
             <button onclick="closeModal('modal-assign-sheet')" class="w-8 h-8 rounded-full bg-[var(--bg-input)] text-[var(--text-muted)] hover:text-white hover:bg-rose-500 shadow-sm flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
         </div>
-        <div class="p-8 space-y-4 bg-[var(--bg-panel)] flex-1 overflow-y-auto">
+        <div class="p-4 sm:p-8 space-y-4 bg-[var(--bg-panel)] flex-1 overflow-y-auto">
          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div><label class="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest block mb-1">Exam ID</label><input type="text" id="as-examId" class="w-full px-4 py-3 rounded-xl shadow-inner font-bold text-xs"></div>
                 <div><label class="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest block mb-1">Exam Title</label><input type="text" id="as-examTitle" class="w-full px-4 py-3 rounded-xl shadow-inner font-bold text-xs"></div>
@@ -1315,7 +1360,7 @@
                 btnHtml = `<button onclick="terminateSession('${actionId}')" class="ml-auto bg-white/20 hover:bg-white/40 border border-white/30 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest pointer-events-auto transition-colors">Terminate</button>`;
             }
 
-            toast.className = `p-4 rounded-2xl shadow-2xl flex items-center gap-4 w-[350px] animate-slide-up pointer-events-auto border ${colorClass} transition-opacity duration-300`;
+          toast.className = `p-4 rounded-2xl shadow-2xl flex items-center gap-4 w-[90vw] sm:w-[350px] max-w-full animate-slide-up pointer-events-auto border ${colorClass} transition-opacity duration-300`;
             toast.innerHTML = `
                 <div class="text-2xl opacity-90"><i class="fa-solid ${icon}"></i></div>
                 <div class="flex-1 pr-2">
@@ -1845,7 +1890,7 @@ window.renderAssignments = () => {
             <tr class="hover:bg-[var(--bg-hover)] border-b border-[var(--border-color)]">
                 <td class="p-6 pl-8"><p class="font-black text-sm uppercase">${a.examId}</p><p class="text-[10px] font-bold text-[var(--text-muted)] mt-1">${a.studentName} (${a.rollNumber})</p></td>
                 <td class="p-6 text-xs font-mono font-bold text-[var(--text-muted)]">${a.teacherEmail}</td>
-                <td class="p-6"><p class="text-[10px] font-black uppercase ${cColor}">${a.status}</p><p class="text-xs font-black mt-1">${a.obtainedTotal||0} / ${a.totalMarks}</p></td>
+               <td class="p-3 md:p-6"><p class="text-[10px] font-black uppercase ${cColor}">${a.status}</p><p class="text-xs font-black mt-1">${a.obtainedTotal||0} / ${a.totalMarks}</p></td>
                 <td class="p-6 text-right pr-8 flex items-center justify-end gap-2 h-full">
                     <a href="${a.answerSheetUrl}" target="_blank" title="View Sheet" class="w-8 h-8 rounded-lg bg-[var(--bg-input)] text-indigo-500 border border-[var(--border-light)] hover:bg-indigo-50 transition-colors flex items-center justify-center shadow-sm"><i class="fa-solid fa-file-pdf"></i></a>
                     <button onclick="openEditAssignment('${a.id}')" title="Edit Assignment Details" class="w-8 h-8 rounded-lg bg-[var(--bg-input)] text-[var(--accent-primary)] border border-[var(--border-light)] hover:bg-[var(--bg-hover)] transition-colors flex items-center justify-center shadow-sm"><i class="fa-solid fa-pen"></i></button>
@@ -1960,10 +2005,10 @@ window.renderAssignments = () => {
         const cColor = a.status==='Checked' ? 'text-emerald-500' : (a.status==='In Review' ? 'text-amber-500' : 'text-indigo-500');
         tb.innerHTML += `
             <tr class="hover:bg-[var(--bg-hover)] border-b border-[var(--border-color)]">
-                <td class="p-6 pl-8"><p class="font-black text-sm uppercase">${a.examId}</p><p class="text-[10px] font-bold text-[var(--text-muted)] mt-1">${a.studentName} (${a.rollNumber})</p></td>
-                <td class="p-6 text-xs font-mono font-bold text-[var(--text-muted)]">${a.teacherEmail}</td>
-                <td class="p-6"><p class="text-[10px] font-black uppercase ${cColor}">${a.status}</p><p class="text-xs font-black mt-1">${a.obtainedTotal||0} / ${a.totalMarks}</p></td>
-                <td class="p-6 text-right pr-8 flex items-center justify-end gap-2 h-full">
+                <td class="p-3 md:p-6 pl-4 md:pl-8"><p class="font-black text-sm uppercase">${a.examId}</p><p class="text-[10px] font-bold text-[var(--text-muted)] mt-1">${a.studentName} (${a.rollNumber})</p></td>
+                <td class="p-3 md:p-6 text-xs font-mono font-bold text-[var(--text-muted)]">${a.teacherEmail}</td>
+                <td class="p-3 md:p-6"><p class="text-[10px] font-black uppercase ${cColor}">${a.status}</p><p class="text-xs font-black mt-1">${a.obtainedTotal||0} / ${a.totalMarks}</p></td>
+                <td class="p-3 md:p-6 text-right pr-4 md:pr-8 flex items-center justify-end gap-2 h-full">
                     
                     ${a.status === 'Checked' ? `
                     <button onclick="openSheetAnalysis('${a.id}', 'manual')" title="Detailed Analysis" class="w-8 h-8 bg-emerald-500 text-white hover:bg-emerald-600 transition-all rounded-lg text-xs flex items-center justify-center shadow-md hover:scale-110 hover:-translate-y-0.5"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
@@ -1983,7 +2028,7 @@ window.renderAssignments = () => {
 };
 
 
-        window.switchTab = (tab) => {
+       window.switchTab = (tab) => {
             views.forEach(v => {
                 const el = document.getElementById(`view-${v}`);
                 if(el) el.classList.add('hidden');
@@ -1993,6 +2038,16 @@ window.renderAssignments = () => {
             document.getElementById(`view-${tab}`).classList.remove('hidden');
             document.getElementById(`nav-${tab}`).classList.add('nav-active');
             renderView();
+
+            // Auto-close mobile sidebar after selection
+            if (window.innerWidth <= 768) {
+                const sidebar = document.querySelector('aside');
+                const overlay = document.getElementById('mobile-sidebar-overlay');
+                if (sidebar && sidebar.classList.contains('mobile-open')) {
+                    sidebar.classList.remove('mobile-open');
+                    overlay.classList.remove('active');
+                }
+            }
         };
 
        const views = ['dashboard', 'students', 'exams', 'live', 'evaluate', 'results', 'notices', 'timetables', 'erp-docs', 'fees-attendance', 'teachers', 'evaluations'];
@@ -2021,12 +2076,12 @@ window.renderAssignments = () => {
             students.forEach(s => {
                 tbody.innerHTML += `
                     <tr class="hover:bg-[var(--bg-hover)] transition-colors border-b border-[var(--border-color)]">
-                        <td class="p-6">
+                       <td class="p-3 md:p-6">
                             <p class="font-black text-sm text-[var(--text-main)]">${s.studentId || 'N/A'}</p>
                             <p class="text-[10px] text-[var(--text-muted)] mt-1 uppercase tracking-widest">Roll: ${s.rollNo || 'N/A'}</p>
                         </td>
                         <td class="p-6 font-bold text-sm text-[var(--text-main)]">${s.name || 'N/A'}</td>
-                        <td class="p-6">
+                       <td class="p-3 md:p-6">
                             <p class="text-xs font-bold text-[var(--text-main)]">${s.school || 'N/A'}</p>
                             <p class="text-[10px] text-[var(--text-muted)] mt-1 uppercase tracking-widest">Sec: ${s.section || 'N/A'}</p>
                         </td>
@@ -2434,17 +2489,17 @@ window.openEditStudent = (id) => {
 
                 tbody.innerHTML += `
                     <tr class="hover:bg-[var(--bg-hover)] transition-colors group border-b border-[var(--border-color)]">
-                        <td class="p-6">
+                      <td class="p-3 md:p-6">
                             <span class="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border shadow-sm ${badgeClass} mb-2 inline-block">${d.type}</span>
                             <p class="font-black text-[var(--text-main)] text-sm mb-1 truncate max-w-[200px]">${d.title}</p>
                             <a href="${d.url}" target="_blank" class="text-[10px] text-[var(--accent-primary)] hover:underline font-bold tracking-widest truncate max-w-[200px] block"><i class="fa-solid fa-up-right-from-square mr-1"></i> Open Resource</a>
                         </td>
-                        <td class="p-6">
+                        <td class="p-3 md:p-6">
                             <p class="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-widest mb-1"><span class="text-[var(--text-main)]">School:</span> ${d.targetSchool || 'All'}</p>
                             <p class="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-widest mb-1"><span class="text-[var(--text-main)]">Branch:</span> ${d.targetBranch || 'All'}</p>
                             <p class="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-widest"><span class="text-[var(--text-main)]">Year/Sem:</span> ${d.targetYearSession || 'All'} / ${d.targetSemester || 'All'}</p>
                         </td>
-                        <td class="p-6">
+                        <td class="p-3 md:p-6">
                             <p class="text-xs font-black text-[var(--text-main)] mb-1 bg-[var(--bg-input)] inline-block px-2 py-1 rounded shadow-sm border border-[var(--border-light)]">Section: ${d.targetSection || 'ALL'}</p>
                             <p class="text-xs font-black text-[var(--text-main)] bg-[var(--bg-input)] inline-block px-2 py-1 rounded shadow-sm border border-[var(--border-light)]">Roll No: ${d.targetRollNo || 'ALL'}</p>
                         </td>
@@ -2655,11 +2710,11 @@ window.openEditStudent = (id) => {
 
                 tbody.innerHTML += `
                     <tr class="hover:bg-[var(--bg-hover)] transition-colors border-b border-[var(--border-color)]">
-                        <td class="p-6">
+                        <td class="p-3 md:p-6">
                             <p class="font-black text-sm text-[var(--text-main)]">${s.name}</p>
                             <p class="text-[10px] text-[var(--text-muted)] font-mono font-bold mt-1">${s.studentId || 'N/A'}</p>
                         </td>
-                        <td class="p-6">
+                        <td class="p-3 md:p-6">
                             <p class="text-xs font-bold text-[var(--text-main)]">${s.course || 'N/A'}</p>
                             <p class="text-[10px] text-[var(--text-muted)] mt-1 uppercase tracking-widest">Sec: ${s.section || 'N/A'}</p>
                         </td>
@@ -2788,14 +2843,14 @@ window.openEditStudent = (id) => {
 
                 tbody.innerHTML += `
                     <tr class="hover:bg-[var(--bg-hover)] transition-colors border-b border-[var(--border-color)]">
-                        <td class="p-6">
+                       <td class="p-3 md:p-6">
                             <p class="font-black text-[var(--text-main)]">${sId} <span class="bg-[var(--bg-input)] border border-[var(--border-light)] px-2 py-0.5 rounded text-[9px] ml-1 opacity-70">${sSec}</span></p>
                             <p class="text-xs text-[var(--text-muted)] font-bold uppercase mt-1 tracking-wider">${sName}</p>
                         </td>
                         <td class="p-6 font-mono font-black text-[var(--accent-primary)] text-lg tracking-wider">${s.examId}</td>
-                        <td class="p-6">${statBadge}</td>
+                       <td class="p-3 md:p-6">${statBadge}</td>
                         <td class="p-6 ${warningColor} text-sm"><i class="fa-solid fa-triangle-exclamation text-xs mr-1"></i> ${s.warningsLogged || 0}</td>
-                        <td class="p-6"><div class="text-xs font-black bg-[var(--bg-input)] px-3 py-1.5 rounded-lg inline-block border border-[var(--border-color)] shadow-sm text-[var(--text-muted)]">${ansCount} Saves</div></td>
+                        <td class="p-3 md:p-6"><div class="text-xs font-black bg-[var(--bg-input)] px-3 py-1.5 rounded-lg inline-block border border-[var(--border-color)] shadow-sm text-[var(--text-muted)]">${ansCount} Saves</div></td>
                         <td class="p-6 text-right pr-8">
                             <div class="flex items-center justify-end gap-2">
                                 <button onclick="watchStream('${s.id}')" title="Watch Live Screen" class="w-8 h-8 bg-indigo-50 text-indigo-600 border border-indigo-200 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:border-indigo-800 transition-all rounded-lg shadow-sm hover:scale-110 flex items-center justify-center disabled:opacity-30" ${isTerminated || isUnlocked || isRetake ? 'disabled' : ''}>
@@ -3395,7 +3450,7 @@ Marks: 15
                     <tr class="hover:bg-[var(--bg-hover)] transition-colors group border-b border-[var(--border-color)] last:border-0">
                         <td class="p-6 font-black text-[var(--text-main)] pl-8 tracking-wider">${s.examId}</td>
                         <td class="p-6 font-mono text-sm text-[var(--text-muted)] font-bold">${sId}<br><span class="text-xs font-sans tracking-wide uppercase opacity-70">${sName}</span></td>
-                        <td class="p-6">${timeStr}</td>
+                     <td class="p-3 md:p-6">${timeStr}</td>
                         <td class="p-6 text-xs ${warnColor}">${s.warningsLogged || 0} Warnings <br> ${termTag}</td>
                         <td class="p-6 text-right flex gap-2 justify-end items-center h-full pr-8">
                             <button onclick="startEvaluation('${s.id}')" title="Evaluate Sheet" ${isWaiting ? 'disabled class="opacity-50 cursor-not-allowed bg-[var(--bg-input)] text-[var(--text-muted)] border border-[var(--border-color)] px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest shadow-sm"' : 'class="action-button px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest shadow-md"'}>Evaluate</button>
