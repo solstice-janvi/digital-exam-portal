@@ -663,7 +663,16 @@
                 qpBtn.classList.add('hidden');
             }
 
-            document.getElementById('eval-iframe').src = a.answerSheetUrl;
+            // Save original URL globally for the Pop-out button
+            window.currentEvalSheetUrl = a.answerSheetUrl;
+
+            // Format Google Drive URLs correctly for iframe embedding
+            let embedUrl = a.answerSheetUrl;
+            if(embedUrl && embedUrl.includes('drive.google.com') && embedUrl.includes('/view')) {
+                embedUrl = embedUrl.replace(/\/view.*$/, '/preview');
+            }
+
+            document.getElementById('eval-iframe').src = embedUrl;
             document.getElementById('eval-student-name').textContent = a.studentName;
             document.getElementById('eval-student-roll').textContent = a.rollNumber;
             document.getElementById('eval-exam-id').textContent = a.examId;
